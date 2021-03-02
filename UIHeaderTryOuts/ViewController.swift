@@ -19,13 +19,18 @@ class ViewController: UIViewController {
     
     private var pagingViewController = PagingViewController()
     private let button = UIButton()
+    
+    private var buttonLeftConstraint: Constraint!
+    
+    private let labelStartOffset: CGFloat = 16
+    private var labelEndOffset: CGFloat = 0
+    
+    private var pages = [UIViewController?].init(repeating: nil, count: 5)
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-//        let firstViewController = TableViewController()
-//        let secondViewController = UIViewController()
-//        pagingViewController = PagingViewController(viewControllers: [firstViewController, secondViewController])
+        self.navigationController?.navigationBar.transform = .init(translationX: 0, y: -topViewFinalHeight)
         
         button.setTitle("No Header", for: .normal)
         button.addTarget(self, action: #selector(buttonAction), for: .touchUpInside)
@@ -34,30 +39,27 @@ class ViewController: UIViewController {
         addChild(pagingViewController)
         
         setupUI()
-        
-        
-//        NotificationCenter.default.addObserver(self, selector: #selector(didScroll), name: Notification.Name("delta"), object: nil)
-//        populateBottomView()
     }
     
-//    @objc func didScroll(notification: NSNotification) {
-//        guard let delta = (notification.userInfo?["deltaNumber"] as? CGFloat) else { return }
-//        let deltaConstraint = delta as? Constraint
-//        print("!!!Recieved delta: \(delta), constraintDelta: \(deltaConstraint)")
-//        let newHeight = headerView.frame.height - delta
-//        print("!!! New height: \(newHeight)")
-//        headerView.snp.updateConstraints { (m) in
-//            m.top.left.right.equalToSuperview()
-//            m.height.equalTo(newHeight)
-//        }
-//    }
+    override func viewDidAppear(_ animated: Bool) {
+        let headerViewWidth = headerView.bounds.size.width
+        let labelViewWidth = button.bounds.size.width
+        
+        labelEndOffset = (headerViewWidth / 2) - (labelViewWidth / 2)
+    }
+    
     @objc func buttonAction(sender: UIButton!) {
-      print("!!! Button tapped")
+        print("!!! Button tapped")
+        let navVC = NavBarViewController()
+        navVC.modalPresentationStyle = .fullScreen
+        navVC.modalTransitionStyle = .coverVertical
+        self.navigationController?.pushViewController(navVC, animated: true)
+        self.view.bringSubviewToFront(button)
     }
     
     func setupUI() {
         view.backgroundColor = .white
-//        headerView.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.size.width, height: 150)
+        headerView.layer.zPosition = 1000
         headerView.addSubview(button)
         view.addSubview(headerView)
         view.addSubview(pagingViewController.view)
@@ -73,7 +75,7 @@ class ViewController: UIViewController {
         }
         
         button.snp.makeConstraints { (m) in
-            m.centerX.equalToSuperview()
+            buttonLeftConstraint = m.left.equalToSuperview().offset(16).constraint
             m.bottom.equalToSuperview().offset(-16)
         }
         
@@ -81,16 +83,6 @@ class ViewController: UIViewController {
             m.top.equalTo(headerView.snp.bottom)
             m.left.right.bottom.equalToSuperview()
         }
-
-        
-    }
-    
-    func populateBottomView() {
-        
-        let tabContentVC = ContentViewController()
-        tabContentVC.innerTableViewScrollDelegate = self
-        tabContentVC.numberOfCells = 30 // (subTabCount + 1) * 10
-
     }
     
     func addPanGestureToTopViewAndCollectionView() {
@@ -145,13 +137,22 @@ class ViewController: UIViewController {
 extension ViewController: PagingViewControllerDataSource {
     
     func numberOfViewControllers(in pagingViewController: PagingViewController) -> Int {
-        return 5
+        return pages.count
     }
     
     func pagingViewController(_: PagingViewController, viewControllerAt index: Int) -> UIViewController {
-        let tableViewVC = TableViewController()
-        tableViewVC.innerTableViewScrollDelegate = self
-        return tableViewVC
+        let currentVc = pages[index]
+        
+        if let currentVc = currentVc {
+            return currentVc
+        } else {
+            let tableViewVC = TableViewController()
+            tableViewVC.innerTableViewScrollDelegate = self
+            
+            pages[index] = tableViewVC
+            
+            return tableViewVC
+        }
     }
     
     func pagingViewController(_: PagingViewController, pagingItemAt index: Int) -> PagingItem {
@@ -164,50 +165,54 @@ extension ViewController: PagingViewControllerDataSource {
 extension ViewController: InnerTableViewScrollDelegate {
     
     var currentHeaderHeight: CGFloat {
-        let headerViewCurrentHeight = headerView.frame.height
-//        print("!!!currentHeaderHeight: \(headerViewCurrentHeight)")
-        return headerViewCurrentHeight
+        return headerView.bounds.size.height
     }
     
     func innerTableViewDidScroll(withDistance scrollDistance: CGFloat) {
-        let newHeight = currentHeaderHeight - scrollDistance
+        let currentHeight = currentHeaderHeight
+        
+        let newHeight = currentHeight - scrollDistance
+        
+        let finalHeight: CGFloat
+        
         if (newHeight >= topViewFinalHeight && newHeight <= topViewInitialHeight) {
+            finalHeight = newHeight
+        } else if (newHeight < topViewFinalHeight) {
+            finalHeight = topViewFinalHeight
+        } else if (newHeight > topViewInitialHeight) {
+            finalHeight = topViewInitialHeight
+        } else {
+            finalHeight = currentHeight
+        }
+        
+        if (currentHeight != finalHeight) {
             headerView.snp.updateConstraints { (m) in
-                print("!!! Constraints updating")
-                m.top.left.right.equalToSuperview()
-                m.height.equalTo(newHeight)
+                print("---")
+                print("!!! ViewController updating headerView constraints New Height = \(finalHeight)")
+                print("---")
+                m.height.equalTo(finalHeight)
             }
+            
+            let ratio = (finalHeight - topViewFinalHeight) / (topViewInitialHeight - topViewFinalHeight)
+            
+            let diff = (labelEndOffset - labelStartOffset) * ratio
+            
+            buttonLeftConstraint.update(offset: labelEndOffset - diff)
+            
+            
+            self.view.updateConstraints()
         }
-        
-//        headerViewHeightConstraint -= scrollDistance
-        print("!!!tableView Scrolldistance: ", scrollDistance, "New Height: ", newHeight)
-        
-        
-        /* Don't restrict the downward scroll.
- 
-        if headerViewHeightConstraint.constant > topViewInitialHeight {
-            headerViewHeightConstraint.constant = topViewInitialHeight
-        }
-         
-        */
-        
-//        if headerViewHeightConstraint < topViewFinalHeight {
-//
-//            headerViewHeightConstraint = topViewFinalHeight
-//        }
     }
     
     func innerTableViewScrollEnded(withScrollDirection scrollDirection: DragDirection) {
         
-        let topViewHeight = headerView.frame.height
+        let topViewHeight = currentHeaderHeight
 
         /*
          *  Scroll is not restricted.
          *  So this check might cause the view to get stuck in the header height is greater than initial height.
          */
         if topViewHeight >= topViewInitialHeight || topViewHeight <= topViewFinalHeight { return }
-
-    
 
         if topViewHeight <= topViewFinalHeight + 20 {
 
@@ -242,14 +247,12 @@ extension ViewController: InnerTableViewScrollDelegate {
         }
         
         headerView.snp.updateConstraints { (m) in
-            m.top.left.right.equalToSuperview()
             m.height.equalTo(topViewInitialHeight)
         }
         
-//        headerViewHeightConstraint = topViewInitialHeight
+        buttonLeftConstraint.update(offset: labelStartOffset)
 
         UIView.animate(withDuration: TimeInterval(time), animations: {
-
             self.view.layoutIfNeeded()
         })
     }
@@ -268,14 +271,12 @@ extension ViewController: InnerTableViewScrollDelegate {
         }
         
         headerView.snp.updateConstraints { (m) in
-            m.top.left.right.equalToSuperview()
             m.height.equalTo(topViewFinalHeight)
         }
         
-//        headerViewHeightConstraint = topViewFinalHeight
+        buttonLeftConstraint.update(offset: labelEndOffset)
 
         UIView.animate(withDuration: TimeInterval(time), animations: {
-
             self.view.layoutIfNeeded()
         })
     }

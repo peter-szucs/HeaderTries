@@ -14,12 +14,22 @@ class TableViewCell: UITableViewCell {
     var titleLabel = UILabel()
     var icon = UIImageView()
     
-    func setCell(title: String) {
-
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        print("____ TableViewCell: init called")
+        
         contentView.addSubview(icon)
         contentView.addSubview(titleLabel)
-//        print("!!! SetCell called for: ", title)
+        
         setupConstraints()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setCell(title: String) {
+        print("____ TableViewCell: setCell called for: ", title)
         
         titleLabel.text = title
         icon.image = #imageLiteral(resourceName: "profile")

@@ -61,7 +61,7 @@ class TableViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 //        return dummyData.count
-        return 100
+        return 1000
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("Selected: Cell \(indexPath.row)")
@@ -80,23 +80,21 @@ class TableViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let delta = scrollView.contentOffset.y - oldContentOffset.y
-//        let deltaDataDict: [String : CGFloat] = ["deltaNumber" : delta]
-//
-//        NotificationCenter.default.post(name: Notification.Name("delta"), object: nil, userInfo: ["deltaNumber": delta])
-//        print("!!! delta: \(delta), oldContentOffset: \(oldContentOffset.y)")
+        
         let topViewCurrentHeightConst = innerTableViewScrollDelegate?.currentHeaderHeight
-        print("!!! delta: \(delta), oldContentOffset: \(oldContentOffset.y) topViewCurrentHeightConst: ", topViewCurrentHeightConst)
+        
+        print("!!! delta: \(delta), scrollView ContentOffset: \(scrollView.contentOffset.y) oldContentOffset: \(oldContentOffset.y) topViewCurrentHeightConst: ", topViewCurrentHeightConst)
+        
         if let topViewUnwrappedHeight = topViewCurrentHeightConst {
 //            print("!!! topViewUnwrapped Height: ", topViewUnwrappedHeight)
 //            print("!!! scrollView.contentOffset.y: \(scrollView.contentOffset.y)")
             if delta > 0,
                 topViewUnwrappedHeight > topViewHeightConstraintRange.lowerBound,
                 scrollView.contentOffset.y > 0 {
-//                print("!!! delta > 0 triggered")
+                print("!!! delta > 0 triggered")
                 
                 dragDirection = .Up
                 innerTableViewScrollDelegate?.innerTableViewDidScroll(withDistance: delta)
-//                print("!!!Delta: ", delta)
                 scrollView.contentOffset.y -= delta
             }
             
