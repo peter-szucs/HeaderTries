@@ -83,7 +83,7 @@ class TableViewController: UIViewController, UITableViewDelegate, UITableViewDat
         
         let topViewCurrentHeightConst = innerTableViewScrollDelegate?.currentHeaderHeight
         
-        print("!!! delta: \(delta), scrollView ContentOffset: \(scrollView.contentOffset.y) oldContentOffset: \(oldContentOffset.y) topViewCurrentHeightConst: ", topViewCurrentHeightConst)
+//        print("!!! delta: \(delta), scrollView ContentOffset: \(scrollView.contentOffset.y) oldContentOffset: \(oldContentOffset.y) topViewCurrentHeightConst: ", topViewCurrentHeightConst)
         
         if let topViewUnwrappedHeight = topViewCurrentHeightConst {
 //            print("!!! topViewUnwrapped Height: ", topViewUnwrappedHeight)
@@ -91,7 +91,7 @@ class TableViewController: UIViewController, UITableViewDelegate, UITableViewDat
             if delta > 0,
                 topViewUnwrappedHeight > topViewHeightConstraintRange.lowerBound,
                 scrollView.contentOffset.y > 0 {
-                print("!!! delta > 0 triggered")
+//                print("!!! delta > 0 triggered")
                 
                 dragDirection = .Up
                 innerTableViewScrollDelegate?.innerTableViewDidScroll(withDistance: delta)

@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 import Parchment
 
-var topViewInitialHeight: CGFloat = 250
+var topViewInitialHeight: CGFloat = 150
 let topViewFinalHeight: CGFloat = UIApplication.shared.statusBarFrame.size.height + 44
 let topViewHeightConstraintRange = topViewFinalHeight..<topViewInitialHeight
 
@@ -21,11 +21,14 @@ class ViewController: UIViewController {
     private let button = UIButton()
     
     private var buttonLeftConstraint: Constraint!
+    private var buttonBottomConstraint: Constraint!
     
     private let labelStartOffset: CGFloat = 16
     private var labelEndOffset: CGFloat = 0
+    private let labelStartBottomOffset: CGFloat = 16
+    private var labelEndBottomOffset: CGFloat = 8
     
-    private var pages = [UIViewController?].init(repeating: nil, count: 5)
+    private var pages = [UIViewController?].init(repeating: nil, count: 10)
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,11 +36,23 @@ class ViewController: UIViewController {
         self.navigationController?.navigationBar.transform = .init(translationX: 0, y: -topViewFinalHeight)
         
         button.setTitle("No Header", for: .normal)
+        button.setTitleColor(.systemBlue, for: .normal)
         button.addTarget(self, action: #selector(buttonAction), for: .touchUpInside)
         
         pagingViewController.dataSource = self
+        pagingViewController.register(PagingCustomCell.self, for: CustomPagingItem.self)
         addChild(pagingViewController)
-        
+        pagingViewController.borderOptions = .hidden
+        pagingViewController.menuItemSize = .selfSizing(estimatedWidth: 100, height: 40)
+        pagingViewController.indicatorClass = CustomIndicatorView.self
+        pagingViewController.indicatorOptions = .visible(
+            height: 32,
+            zIndex: -1,
+            spacing: .zero,
+            insets: UIEdgeInsets(top: 0, left: 0, bottom: 5, right: 0)
+        )
+        pagingViewController.indicatorColor = .purple
+        pagingViewController.collectionView.contentInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         setupUI()
     }
     
@@ -46,6 +61,8 @@ class ViewController: UIViewController {
         let labelViewWidth = button.bounds.size.width
         
         labelEndOffset = (headerViewWidth / 2) - (labelViewWidth / 2)
+        
+        addPanGestureToTopViewAndCollectionView()
     }
     
     @objc func buttonAction(sender: UIButton!) {
@@ -58,16 +75,17 @@ class ViewController: UIViewController {
     }
     
     func setupUI() {
+        addShadowToHeader()
         view.backgroundColor = .white
         headerView.layer.zPosition = 1000
         headerView.addSubview(button)
         view.addSubview(headerView)
         view.addSubview(pagingViewController.view)
-        pagingViewController.backgroundColor = .brown
+        pagingViewController.backgroundColor = .clear
         pagingViewController.didMove(toParent: self)
         pagingViewController.view.translatesAutoresizingMaskIntoConstraints = false
         
-        headerView.backgroundColor = .orange
+        headerView.backgroundColor = .white
         
         headerView.snp.makeConstraints { (m) in
             m.top.left.right.equalToSuperview()
@@ -76,13 +94,22 @@ class ViewController: UIViewController {
         
         button.snp.makeConstraints { (m) in
             buttonLeftConstraint = m.left.equalToSuperview().offset(16).constraint
-            m.bottom.equalToSuperview().offset(-16)
+            buttonBottomConstraint = m.bottom.equalToSuperview().offset(-16).constraint
         }
         
         pagingViewController.view.snp.makeConstraints { (m) in
             m.top.equalTo(headerView.snp.bottom)
             m.left.right.bottom.equalToSuperview()
         }
+        
+    }
+    
+    func addShadowToHeader() {
+        pagingViewController.collectionView.layer.masksToBounds = true
+        pagingViewController.collectionView.layer.shadowOffset = CGSize(width: 0, height: 1)
+        pagingViewController.collectionView.layer.shadowRadius = 1
+        pagingViewController.collectionView.layer.shadowOpacity = 0.3
+        
     }
     
     func addPanGestureToTopViewAndCollectionView() {
@@ -92,14 +119,13 @@ class ViewController: UIViewController {
         headerView.isUserInteractionEnabled = true
         headerView.addGestureRecognizer(topViewPanGesture)
         
-        /* Adding pan gesture to collection view is overriding the collection view scroll.
-         
-         let collViewPanGesture = UIPanGestureRecognizer(target: self, action: #selector(topViewMoved))
-         
-         tabBarCollectionView.isUserInteractionEnabled = true
-         tabBarCollectionView.addGestureRecognizer(collViewPanGesture)
-         
-         */
+        // Adding pan gesture to collection view is overriding the collection view scroll.
+        
+        // TODO: - Check to see if possibility to put this into topViewMoved instead. using collectionviews
+        //         integrated gesturerecognizer to differentiate
+//        pagingViewController.collectionView.isUserInteractionEnabled = true
+//        pagingViewController.collectionView.addGestureRecognizer(topViewPanGesture)
+        
     }
     var dragInitialY: CGFloat = 0
     var dragPreviousY: CGFloat = 0
@@ -107,7 +133,14 @@ class ViewController: UIViewController {
     
     @objc func topViewMoved(_ gesture: UIPanGestureRecognizer) {
         
+        // --- Implement gesture of collectionview --
+        
+//        pagingViewController.collectionView.gestureRecognizers
+        
+        // ------------------------------------------
+        
         var dragYDiff : CGFloat
+        
         
         switch gesture.state {
         
@@ -115,6 +148,7 @@ class ViewController: UIViewController {
             
             dragInitialY = gesture.location(in: self.view).y
             dragPreviousY = dragInitialY
+            print("--- Drag Began, initY: \(dragInitialY)")
             
         case .changed:
             
@@ -123,6 +157,7 @@ class ViewController: UIViewController {
             dragPreviousY = dragCurrentY
             dragDirection = dragYDiff < 0 ? .Down : .Up
             innerTableViewDidScroll(withDistance: dragYDiff)
+            print("--- Drag changed, dragYDiff: \(dragYDiff)")
             
         case .ended:
             
@@ -156,7 +191,7 @@ extension ViewController: PagingViewControllerDataSource {
     }
     
     func pagingViewController(_: PagingViewController, pagingItemAt index: Int) -> PagingItem {
-        return PagingIndexItem(index: index, title: "View \(index+1)")
+        return CustomPagingItem(index: index, text: "View \(index+1)")
     }
     
     
@@ -185,20 +220,29 @@ extension ViewController: InnerTableViewScrollDelegate {
             finalHeight = currentHeight
         }
         
+        if (finalHeight == topViewFinalHeight) {
+            print("!!! adding shadow")
+            pagingViewController.collectionView.layer.masksToBounds = false
+        } else if (finalHeight > topViewFinalHeight) {
+            print("!!! removing shadow")
+            pagingViewController.collectionView.layer.masksToBounds = true
+        }
+        
         if (currentHeight != finalHeight) {
             headerView.snp.updateConstraints { (m) in
-                print("---")
-                print("!!! ViewController updating headerView constraints New Height = \(finalHeight)")
-                print("---")
+//                print("---")
+//                print("!!! ViewController updating headerView constraints New Height = \(finalHeight)")
+//                print("---")
                 m.height.equalTo(finalHeight)
             }
             
             let ratio = (finalHeight - topViewFinalHeight) / (topViewInitialHeight - topViewFinalHeight)
             
-            let diff = (labelEndOffset - labelStartOffset) * ratio
+            let leftDiff = (labelEndOffset - labelStartOffset) * ratio
+            let bottomDiff = (labelEndBottomOffset - labelStartBottomOffset) * ratio
             
-            buttonLeftConstraint.update(offset: labelEndOffset - diff)
-            
+            buttonLeftConstraint.update(offset: labelEndOffset - leftDiff)
+            buttonBottomConstraint.update(offset: bottomDiff - labelEndBottomOffset)
             
             self.view.updateConstraints()
         }
@@ -251,6 +295,7 @@ extension ViewController: InnerTableViewScrollDelegate {
         }
         
         buttonLeftConstraint.update(offset: labelStartOffset)
+        buttonBottomConstraint.update(offset: -labelStartBottomOffset)
 
         UIView.animate(withDuration: TimeInterval(time), animations: {
             self.view.layoutIfNeeded()
@@ -275,6 +320,7 @@ extension ViewController: InnerTableViewScrollDelegate {
         }
         
         buttonLeftConstraint.update(offset: labelEndOffset)
+        buttonBottomConstraint.update(offset: -labelEndBottomOffset)
 
         UIView.animate(withDuration: TimeInterval(time), animations: {
             self.view.layoutIfNeeded()

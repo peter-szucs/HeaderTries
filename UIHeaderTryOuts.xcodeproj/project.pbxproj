@@ -18,6 +18,9 @@
 		5256286B25E3F8910043F9C4 /* ContentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5256286A25E3F8910043F9C4 /* ContentViewController.swift */; };
 		5256286E25ECD14E0043F9C4 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5256286D25ECD14E0043F9C4 /* DetailViewController.swift */; };
 		5256287125ED3E590043F9C4 /* NavBarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5256287025ED3E590043F9C4 /* NavBarViewController.swift */; };
+		5256289825F11A0C0043F9C4 /* PagingCustomCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5256289725F11A0B0043F9C4 /* PagingCustomCell.swift */; };
+		5256289B25F22C440043F9C4 /* CustomPagingItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5256289A25F22C440043F9C4 /* CustomPagingItem.swift */; };
+		5256289E25F2350D0043F9C4 /* CustomIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5256289D25F2350D0043F9C4 /* CustomIndicatorView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +38,9 @@
 		5256286A25E3F8910043F9C4 /* ContentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewController.swift; sourceTree = "<group>"; };
 		5256286D25ECD14E0043F9C4 /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
 		5256287025ED3E590043F9C4 /* NavBarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavBarViewController.swift; sourceTree = "<group>"; };
+		5256289725F11A0B0043F9C4 /* PagingCustomCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagingCustomCell.swift; sourceTree = "<group>"; };
+		5256289A25F22C440043F9C4 /* CustomPagingItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomPagingItem.swift; sourceTree = "<group>"; };
+		5256289D25F2350D0043F9C4 /* CustomIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomIndicatorView.swift; sourceTree = "<group>"; };
 		5F7A872DB1B3CD892BB3C499 /* Pods_UIHeaderTryOuts.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UIHeaderTryOuts.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -74,6 +80,9 @@
 				5256282E25E3B62D0043F9C4 /* AppDelegate.swift */,
 				5256283025E3B62D0043F9C4 /* SceneDelegate.swift */,
 				5256283225E3B62D0043F9C4 /* ViewController.swift */,
+				5256289D25F2350D0043F9C4 /* CustomIndicatorView.swift */,
+				5256289725F11A0B0043F9C4 /* PagingCustomCell.swift */,
+				5256289A25F22C440043F9C4 /* CustomPagingItem.swift */,
 				5256286D25ECD14E0043F9C4 /* DetailViewController.swift */,
 				5256287025ED3E590043F9C4 /* NavBarViewController.swift */,
 				5256286725E3E4930043F9C4 /* TableViewController.swift */,
@@ -219,11 +228,14 @@
 				5256283325E3B62D0043F9C4 /* ViewController.swift in Sources */,
 				5256284925E3CE520043F9C4 /* TableViewCell.swift in Sources */,
 				5256282F25E3B62D0043F9C4 /* AppDelegate.swift in Sources */,
+				5256289B25F22C440043F9C4 /* CustomPagingItem.swift in Sources */,
 				5256286825E3E4930043F9C4 /* TableViewController.swift in Sources */,
 				5256286B25E3F8910043F9C4 /* ContentViewController.swift in Sources */,
+				5256289E25F2350D0043F9C4 /* CustomIndicatorView.swift in Sources */,
 				5256283125E3B62D0043F9C4 /* SceneDelegate.swift in Sources */,
 				5256287125ED3E590043F9C4 /* NavBarViewController.swift in Sources */,
 				5256286E25ECD14E0043F9C4 /* DetailViewController.swift in Sources */,
+				5256289825F11A0C0043F9C4 /* PagingCustomCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
